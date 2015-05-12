@@ -30,7 +30,10 @@ debug_log "ENDTIME=${ENDTIME}"
 debug_log "PERIOD=${PERIOD}"
 
 # メトリクスファイル名
-OutputFileName=${TargetDate}_${NAMESPACE}_${METRICNAME}_${STATISTICS}.json
+if [ ! -e metrics ]; then 
+  mkdir metrics
+fi
+OutputFileName=metrics/${TargetDate}_${NAMESPACE}_${METRICNAME}_${STATISTICS}.json
 debug_log "OutputFileName=${OutputFileName}"
 
 # AWSコマンド
