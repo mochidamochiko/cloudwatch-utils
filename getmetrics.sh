@@ -15,10 +15,14 @@ debug_log() {
 NAMESPACE=$1
 METRICNAME=$3
 STATISTICS=$4
+if [ -z "${STATISTICS}" ]; then
+  STATISTICS=ALL
+fi
 
 debug_log "NAMESPACE=${NAMESPACE}"
 debug_log "METRICNAME=${METRICNAME}"
 debug_log "STATISTICS=${STATISTICS}"
+
 
 TargetDate=$2
 STARTTIME=`date -j -v-9H -f %Y%m%d%H%M%S ${TargetDate}000000 +%Y-%m-%dT%TZ`
@@ -29,22 +33,38 @@ debug_log "STARTTIME=${STARTTIME}"
 debug_log "ENDTIME=${ENDTIME}"
 debug_log "PERIOD=${PERIOD}"
 
-# メトリクスファイル名
-if [ ! -e metrics ]; then 
-  mkdir metrics
+get_metrics() {
+  STATISTICS=$1
+  debug_log "STATISTICS=${STATISTICS}"
+
+  # メトリクスファイル名
+  if [ ! -e metrics ]; then 
+    mkdir metrics
+  fi
+  OutputFileName=metrics/${TargetDate}_${NAMESPACE}_${METRICNAME}_${STATISTICS}.json
+  debug_log "OutputFileName=${OutputFileName}"
+
+  # AWSコマンド
+  AwsCmd="aws cloudwatch get-metric-statistics \
+    --namespace AWS/${NAMESPACE} \
+    --metric-name ${METRICNAME} \
+    --start-time ${STARTTIME} \
+    --end-time ${ENDTIME} \
+    --period ${PERIOD} \
+    --statistics ${STATISTICS}"
+  debug_log "${AwsCmd}"
+
+  ${AwsCmd} > ${OutputFileName}
+}
+
+if [ ${STATISTICS} = "ALL" ]; then
+  debug_log "Call all statistics"
+  get_metrics Average
+  get_metrics Sum
+  get_metrics SampleCount
+  get_metrics Maximum
+  get_metrics Minimum
+else
+  get_metrics ${STATISTICS}
 fi
-OutputFileName=metrics/${TargetDate}_${NAMESPACE}_${METRICNAME}_${STATISTICS}.json
-debug_log "OutputFileName=${OutputFileName}"
-
-# AWSコマンド
-AwsCmd="aws cloudwatch get-metric-statistics \
-  --namespace AWS/${NAMESPACE} \
-  --metric-name ${METRICNAME} \
-  --start-time ${STARTTIME} \
-  --end-time ${ENDTIME} \
-  --period ${PERIOD} \
-  --statistics ${STATISTICS}"
-debug_log "${AwsCmd}"
-
-${AwsCmd} > ${OutputFileName}
 
