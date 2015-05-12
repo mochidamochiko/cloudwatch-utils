@@ -1,0 +1,13 @@
+CPUCreditUsage
+CPUCreditBalance
+CPUUtilization
+DiskReadOps
+DiskWriteOps
+DiskReadBytes
+DiskWriteBytes
+NetworkIn
+NetworkOut
+StatusCheckFailed
+StatusCheckFailed_Instance
+StatusCheckFailed_System
+
