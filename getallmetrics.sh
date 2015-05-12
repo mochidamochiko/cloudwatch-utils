@@ -1,7 +1,7 @@
 #!/bin/bash
 
 usage() {
-  echo "getmetrics.sh <namespace(exclude AWS/)> <targetdate(yyyymmdd)>"
+  echo "getmetrics.sh <targetdate(yyyymmdd)> <namespace(exclude AWS/)> <dementions>"
   exit 1
 }
 
@@ -12,10 +12,14 @@ debug_log() {
 }
 
 # オプション解析
-NAMESPACE=$1
-TargetDate=$2
+TargetDate=$1
+NAMESPACE=$2
+ResourceName=$3
+STATISTICS=ALL
 debug_log "NAMESPACE=${NAMESPACE}"
 debug_log "TargetDate=${TargetDate}"
+debug_log "ResourceName=${ResourceName}"
+debug_log "STATISTICS=${STATISTICS}"
 
 MetricsList=conf/metrics-${NAMESPACE}.lst
 debug_log "MetricsList=${MetricsList}"
@@ -31,6 +35,6 @@ cat "${MetricsList}" | while read line; do
   debug_log "METRICNAME=${METRICNAME}"
 
   debug_log "Call getmetrics.sh with ${METRICNAME}"
-  ./getmetrics.sh ${NAMESPACE} ${TargetDate} ${METRICNAME}
+  ./getmetrics.sh ${TargetDate} ${NAMESPACE} ${METRICNAME} ${STATISTICS} ${ResourceName}
 done
 

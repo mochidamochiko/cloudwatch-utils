@@ -1,7 +1,7 @@
 #!/bin/bash
 
 usage() {
-  echo "getmetrics.sh <namespace(exclude AWS/)> <targetdate(yyyymmdd)> <metricname> <statistics>"
+  echo "getmetrics.sh <targetdate(yyyymmdd)> <namespace(exclude AWS/)> <metricname> <statistics> <dementions>"
   exit 1
 }
 
@@ -12,7 +12,7 @@ debug_log() {
 }
 
 # Option解析
-NAMESPACE=$1
+NAMESPACE=$2
 METRICNAME=$3
 STATISTICS=$4
 if [ -z "${STATISTICS}" ]; then
@@ -23,8 +23,7 @@ debug_log "NAMESPACE=${NAMESPACE}"
 debug_log "METRICNAME=${METRICNAME}"
 debug_log "STATISTICS=${STATISTICS}"
 
-
-TargetDate=$2
+TargetDate=$1
 STARTTIME=`date -j -v-9H -f %Y%m%d%H%M%S ${TargetDate}000000 +%Y-%m-%dT%TZ`
 ENDTIME=`date -j -v+21H -f %Y%m%d%H%M%S ${TargetDate}000000 +%Y-%m-%dT%TZ`
 PERIOD=300
@@ -32,6 +31,22 @@ PERIOD=300
 debug_log "STARTTIME=${STARTTIME}"
 debug_log "ENDTIME=${ENDTIME}"
 debug_log "PERIOD=${PERIOD}"
+
+ResourceName=$5
+if [ ! -z "${ResourceName}" ]; then
+  DementionsList=conf/dementions-${NAMESPACE}.lst
+  debug_log "DementionsList=${DementionsList}"
+
+  # ディメンションを設定
+  for line in `cat "${DementionsList}"`; do
+    if [ -z "${line}" ]; then
+      continue
+    fi
+
+    DEMENTIONS="Name=${line},Value=${ResourceName}"
+    debug_log "DEMENTIONS=${DEMENTIONS}"
+  done
+fi
 
 get_metrics() {
   STATISTICS=$1
@@ -41,7 +56,11 @@ get_metrics() {
   if [ ! -e metrics ]; then 
     mkdir metrics
   fi
-  OutputFileName=metrics/${TargetDate}_${NAMESPACE}_${METRICNAME}_${STATISTICS}.json
+  if [ -z "${ResourceName}" ]; then
+    OutputFileName=metrics/${TargetDate}_${NAMESPACE}_${METRICNAME}_${STATISTICS}.json
+  else
+    OutputFileName=metrics/${TargetDate}_${NAMESPACE}_${ResourceName}_${METRICNAME}_${STATISTICS}.json
+  fi
   debug_log "OutputFileName=${OutputFileName}"
 
   # AWSコマンド
@@ -52,6 +71,9 @@ get_metrics() {
     --end-time ${ENDTIME} \
     --period ${PERIOD} \
     --statistics ${STATISTICS}"
+  if [ ! -z "${DEMENTIONS}" ]; then
+    AwsCmd="${AwsCmd} --dimensions ${DEMENTIONS}"
+  fi
   debug_log "${AwsCmd}"
 
   ${AwsCmd} > ${OutputFileName}
