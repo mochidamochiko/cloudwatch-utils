@@ -1,0 +1,17 @@
+BinLogDiskUsage
+CPUUtilization
+DatabaseConnections
+DiskQueueDepth
+FreeableMemory
+FreeStorageSpace
+ReplicaLag
+SwapUsage
+ReadIOPS
+WriteIOPS
+ReadLatency
+WriteLatency
+ReadThroughput
+WriteThroughput
+NetworkReceiveThroughput
+NetworkTransmitThroughput
+

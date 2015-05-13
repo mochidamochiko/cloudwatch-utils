@@ -1,0 +1,14 @@
+CPUUtilization
+DatabaseConnections
+HealthStatus
+MaintenanceMode
+NetworkReceiveThroughput
+NetworkTransmitThroughput
+PercentageDiskSpaceUsed
+ReadIOPS
+ReadLatency
+ReadThroughput
+WriteIOPS
+WriteLatency
+WriteThroughput
+
