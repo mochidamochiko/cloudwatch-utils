@@ -24,8 +24,13 @@ debug_log "METRICNAME=${METRICNAME}"
 debug_log "STATISTICS=${STATISTICS}"
 
 TargetDate=$1
-STARTTIME=`date -j -v-9H -f %Y%m%d%H%M%S ${TargetDate}000000 +%Y-%m-%dT%TZ`
-ENDTIME=`date -j -v+21H -f %Y%m%d%H%M%S ${TargetDate}000000 +%Y-%m-%dT%TZ`
+if [ `uname` = "Darwin" ];then
+  STARTTIME=`date -j -v-9H -f %Y%m%d%H%M%S ${TargetDate}000000 +%Y-%m-%dT%TZ`
+  ENDTIME=`date -j -v+21H -f %Y%m%d%H%M%S ${TargetDate}000000 +%Y-%m-%dT%TZ`
+else
+  STARTTIME=`date -u -d "${TargetDate} - 9hours " +%Y-%m-%dT%TZ`
+  ENDTIME=`date -u -d "${TargetDate} + 21hours " +%Y-%m-%dT%TZ`
+fi
 PERIOD=300
 
 debug_log "STARTTIME=${STARTTIME}"
